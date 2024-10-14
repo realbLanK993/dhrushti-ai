@@ -3,30 +3,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Define types for our data structures
 type Point = { x: number; y: number };
 type Panel = string;
 
-// Mock API functions
-const getCalibrationImage = async (): Promise<string> => {
-  // In a real scenario, this would be an API call
-  return "https://v0.dev/placeholder.svg?height=600&width=800";
-};
-
+// Mock API function to get panels
 const getPanels = async (): Promise<Panel[]> => {
   // In a real scenario, this would be an API call
   return ["Panel 1", "Panel 2", "Panel 3"];
@@ -34,26 +29,24 @@ const getPanels = async (): Promise<Panel[]> => {
 
 export default function CalibrationModal() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [imageUrl, setImageUrl] = useState<string>("");
   const [panels, setPanels] = useState<Panel[]>([]);
   const [selectedPanel, setSelectedPanel] = useState<Panel | null>(null);
   const [points, setPoints] = useState<Point[]>([]);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      getCalibrationImage().then(setImageUrl);
       getPanels().then(setPanels);
     }
   }, [isOpen]);
 
-  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+  const handleDivClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (points.length >= 4) return;
 
-    const rect = imageRef.current?.getBoundingClientRect();
+    const rect = divRef.current?.getBoundingClientRect();
     if (rect) {
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
 
       setPoints([...points, { x, y }]);
     }
@@ -79,31 +72,33 @@ export default function CalibrationModal() {
       <DialogTrigger asChild>
         <Button variant="outline">Open Calibration</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white text-black w-full min-w-[400px]">
+      <DialogContent className="w-full bg-white text-black rounded overflow-scroll md:overflow-auto">
         <DialogHeader>
           <DialogTitle>Display Calibration</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="relative">
-            {imageUrl && (
-              <img
-                ref={imageRef}
-                src={imageUrl}
-                alt="Calibration"
-                className="w-full h-auto"
-                onClick={handleImageClick}
-              />
-            )}
+          <div
+            ref={divRef}
+            className="relative md:h-[200px] w-full flex flex-col justify-center items-center aspect-video bg-gray-200 cursor-crosshair"
+            onClick={handleDivClick}
+          >
+            <span className="font-bold flex justify-center items-center flex-col gap-4 text-black/60">
+              {selectedPanel ?? "Select a panel"}
+              <span>{selectedPanel && <>16:9</>}</span>
+            </span>
             {points.map((point, index) => (
-              <div
-                key={index}
-                className="absolute w-4 h-4 bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2"
-                style={{ left: point.x, top: point.y }}
-              >
-                <span className="absolute top-4 left-4 text-white bg-black px-1 rounded">
-                  {index + 1}
-                </span>
-              </div>
+              <React.Fragment key={index}>
+                <div
+                  className="absolute w-4 h-4 bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                ></div>
+                <div
+                  className="absolute min-w-[5.5rem] h-6 px-2 bg-black text-white rounded-full"
+                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                >
+                  {index + 1} ({point.x.toFixed(0)}, {point.y.toFixed(0)})
+                </div>
+              </React.Fragment>
             ))}
           </div>
           <div className="flex items-center gap-4">

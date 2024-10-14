@@ -101,7 +101,7 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-between px-2 py-4">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between px-2 py-4">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
