@@ -9,9 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
+import { MoreHorizontalIcon } from "lucide-react";
 import {
   EditEyeTrackerExperimentsForm,
   EyeTrackerExperimentsForm,
@@ -97,22 +104,30 @@ export default function EyeTrackerExperiments() {
       cell: ({ row }) => {
         const experiment = row.original;
         return (
-          <Dialog>
-            <DialogTrigger asChild>
-              <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
-                Edit <Pencil size={12} />
-              </span>
-            </DialogTrigger>
-            <DialogContent className="bg-white text-black">
-              <DialogHeader>
-                <DialogTitle>Edit Experiment {experiment.id}</DialogTitle>
-              </DialogHeader>
-              <EditEyeTrackerExperimentsForm
-                editEyeTrackerExperiment={editEyeTrackerExperiment}
-                experiment={experiment}
-              />
-            </DialogContent>
-          </Dialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <MoreHorizontalIcon size={16} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Edit
+                  </DropdownMenuItem>
+                </DialogTrigger>
+                <DialogContent className="bg-white text-black">
+                  <DialogHeader>
+                    <DialogTitle>Edit Experiment {experiment.id}</DialogTitle>
+                  </DialogHeader>
+                  <EditEyeTrackerExperimentsForm
+                    editEyeTrackerExperiment={editEyeTrackerExperiment}
+                    experiment={experiment}
+                  />
+                </DialogContent>
+              </Dialog>
+              <DropdownMenuItem>Download</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       },
     },
