@@ -151,7 +151,7 @@ export default function EyeTrackerExperiments() {
         </Dialog>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={eyeTrackerExperiments} />
+        <DataTable columns={columns} dataValues={eyeTrackerExperiments} />
       </CardContent>
     </Card>
   );

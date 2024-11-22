@@ -1,7 +1,17 @@
 import CalibrationModal from "@/components/calibration-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import UserCalibration from "@/components/user-calibration/user-calibration";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 
 export default async function DashboardPage() {
   const tables = [
@@ -28,8 +38,21 @@ export default async function DashboardPage() {
   ];
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end w-full">
+      <div className="flex gap-2 justify-end w-full">
         <CalibrationModal />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"outline"}>User Calibration</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-screen flex flex-col h-screen">
+            <DialogHeader className="w-fit h-fit">
+              <DialogTitle>User Calibration</DialogTitle>
+            </DialogHeader>
+            <div className="w-full h-full justify-center items-center">
+              <UserCalibration />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1,57 +1,126 @@
 "use client";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CameraForm, EditCameraForm } from "@/components/form/camera/form";
+import { CameraForm } from "@/components/form/camera/form";
 import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
-import { Pencil } from "lucide-react";
-import { useState } from "react";
-import { AddCameraProps, Camera, EditCameraProps } from "@/lib/types/camera";
+import { Loader2, Pencil } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Camera } from "@/lib/types/camera";
+import { useFetch } from "@/lib/hooks";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
-const data: Camera[] = [
-  {
-    id: "cam_1",
-    created: new Date("2024-01-15T09:30:00"),
-    manufacturer: "Canon",
-    model: "EOS 90D",
-    serialNumber: "SN123456789",
-    description: "Desc 1",
-  },
-  {
-    id: "cam_2",
-    created: new Date("2023-12-22T14:45:00"),
-    manufacturer: "Nikon",
-    model: "Z6 II",
-    serialNumber: "SN987654321",
-    description: "Desc 2",
-  },
-  {
-    id: "cam_3",
-    created: new Date("2023-11-10T08:15:00"),
-    manufacturer: "Sony",
-    model: "Alpha 7R IV",
-    serialNumber: "SN2468101214",
-    description: "Desc 3",
-  },
-];
+const EditCameraForm = ({
+  camera,
+  setCameras,
+}: {
+  camera: Camera;
+  setCameras: React.Dispatch<React.SetStateAction<Camera[]>>;
+}) => {
+  const { response, fetchData } = useFetch(`/camera/update`);
+  const [data, setData] = useState({ ...camera });
+  const [open, setOpen] = useState(false);
+  const editCamera = (body: { uid: string; description: string }) => {
+    return fetchData({
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then(() => {
+        console.log(response, "check");
+          setCameras((prev) => {
+            const index = prev.findIndex((c) => {
+              return c.uid === camera.uid;
+            });
+
+            if (index == -1) {
+              alert("No such camera exists");
+            }
+            prev[index].description = data.description ?? "";
+            return [...prev];
+          });
+        
+      })
+      .catch((err) => {
+        console.log("Error: \n", err);
+      }).finally(() => setOpen(false));
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
+          Edit <Pencil size={12} />
+        </span>
+      </DialogTrigger>
+      <DialogContent className="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Edit Camera {camera.uid}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 ">
+          <div className="flex flex-col gap-2">
+            <Label className="font-bold" htmlFor="description">
+              Description
+            </Label>
+            <Textarea
+              value={data.description ?? ""}
+              onChange={(e) =>
+                setData({ ...data, description: e.target.value })
+              }
+              id="description"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setData({ ...data, description: "" })}
+              variant={"outline"}
+            >
+              Clear
+            </Button>
+            <Button
+              onClick={() =>
+                editCamera({
+                  uid: data.uid,
+                  description: data.description ?? "",
+                })
+              }
+              type="submit"
+            >
+              Update
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default function Cameras() {
-  const [cameras, setCameras] = useState<Camera[]>(data);
-  const [open, setOpen] = useState(false);
+  const { data, loading, error, fetchData } =
+    useFetch<Camera[]>(`/camera/view/all`);
+  const [cameras, setCameras] = useState<Camera[]>(data ?? []);
+  useEffect(() => {
+    console.log("cameras", cameras);
+  }, [cameras])
   const columns: ColumnDef<Camera>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "uid",
       header: "ID",
     },
     {
-      accessorKey: "created",
+      accessorKey: "createdTimestamp",
       header: "Created",
     },
     {
@@ -71,76 +140,36 @@ export default function Cameras() {
       header: "Action",
       cell: ({ row }) => {
         const camera = row.original;
-        return (
-          <Dialog>
-            <DialogTrigger asChild>
-              <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
-                Edit <Pencil size={12} />
-              </span>
-            </DialogTrigger>
-            <DialogContent className="bg-white text-black">
-              <DialogHeader>
-                <DialogTitle>Edit Camera {camera.id}</DialogTitle>
-              </DialogHeader>
-              <EditCameraForm editCamera={editCamera} camera={camera} />
-            </DialogContent>
-          </Dialog>
-        );
+        return <EditCameraForm setCameras={setCameras} camera={camera} />;
       },
     },
   ];
-  const addCamera: (props: AddCameraProps) => void = ({
-    manufacturer,
-    model,
-    serialNumber,
-    description,
-  }) => {
-    const newCamera: Camera = {
-      id: `cam_${cameras.length + 1}`,
-      created: new Date(),
-      manufacturer: manufacturer,
-      model: model,
-      serialNumber: serialNumber,
-      description: description ?? "",
-    };
-    setCameras([...cameras, newCamera]);
-    setOpen(false);
-  };
-  const editCamera: (props: EditCameraProps) => void = ({
-    id,
-    description,
-  }) => {
-    console.log(id);
+  useEffect(() => {
+    console.log("calling");
 
-    const index = cameras.findIndex((camera) => {
-      console.log(camera.id, id);
-      return camera.id === id;
-    });
-    if (index == -1) {
-      alert("No such camera exists");
-    }
-    cameras[index].description = description ?? "";
-    setCameras([...cameras]);
-    setOpen(false);
-  };
+    fetchData();
+  }, [fetchData]);
+  useEffect(() => {
+    setCameras(data);
+  }, [data]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between gap-2">
         <p className="font-bold">All Cameras</p>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>Add Camera</Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white text-black">
-            <DialogHeader>
-              <DialogTitle>Add Camera</DialogTitle>
-            </DialogHeader>
-            <CameraForm addCamera={addCamera} />
-          </DialogContent>
-        </Dialog>
+        <CameraForm setData={setCameras} />
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={cameras} />
+        {loading ? (
+          <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
+            <Loader2 size={16} className="animate-spin" />
+            Loading...
+          </p>
+        ) : error ? (
+          <p>{error.message}</p>
+        ) : (
+          <DataTable columns={columns} dataValues={cameras} />
+        )}
       </CardContent>
     </Card>
   );

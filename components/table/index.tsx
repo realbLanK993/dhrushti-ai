@@ -32,18 +32,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+  dataValues: TData[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  dataValues,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [data, setData] = useState(dataValues);
   const table = useReactTable({
     data,
     columns,
@@ -55,6 +56,9 @@ export function DataTable<TData, TValue>({
       sorting,
     },
   });
+  useEffect(() => {
+    setData(dataValues);
+  }, [dataValues]);
   return (
     <div className="rounded-md ">
       <Table>

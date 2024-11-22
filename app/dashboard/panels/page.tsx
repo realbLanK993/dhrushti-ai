@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,41 +14,91 @@ import { Pencil } from "lucide-react";
 import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/table/column-header";
-import { EditPanelForm, PanelForm } from "@/components/form/panels/form";
-import { useState } from "react";
-import { AddPanelProps, EditPanelProps, Panel } from "@/lib/types/panel";
+import { PanelForm } from "@/components/form/panels/form";
+import { useEffect, useState } from "react";
+import { EditPanelProps, Panel } from "@/lib/types/panel";
+import { useFetch } from "@/lib/hooks";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@radix-ui/react-label";
 
-const data: Panel[] = [
-  {
-    id: "1",
-    width: 500,
-    height: 300,
-    reportingUnits: "mm",
-    description: "Desc 1",
-  },
-  {
-    id: "2",
-    width: 800,
-    height: 600,
-    reportingUnits: "pixels",
-    horizontalResolution: 2560,
-    verticalResolution: 1440,
-    description: "Desc 2",
-  },
-  {
-    id: "3",
-    width: 700,
-    height: 500,
-    reportingUnits: "mm",
-    description: "Desc 3",
-  },
-];
 
+const EditPanelForm = ({panel, setPanels}:{panel: Panel; setPanels: React.Dispatch<React.SetStateAction<Panel[]>>}) => {
+  const [data, setData] = useState({ ...panel });
+  const {fetchData} = useFetch(`/panel/update`);
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    setData({...panel})
+  },[panel])
+  const editPanel: (props: EditPanelProps) => void = ({ uid, description }) => {
+    fetchData({
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid, description }),
+    }).then(() => {
+      setPanels((prev) => {
+        const index = prev.findIndex((panel) => panel.uid === uid);
+        if (index == -1) {
+          alert("No such panel exists");
+        }
+        prev[index].description = description ?? "";
+        return [...prev];
+      });
+      setOpen(false);
+    })
+    
+    
+    
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
+          Edit <Pencil size={12} />
+        </span>
+      </DialogTrigger>
+      <DialogContent className="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Update panel {panel.uid}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 ">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="description">Description (optional)</Label>
+            <Textarea
+              onChange={(e) =>
+                setData({ ...data, description: e.target.value })
+              }
+              value={data.description ?? ""}
+              id="description"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setData({ ...data, description: "" })}
+              variant={"outline"}
+            >
+              Clear
+            </Button>
+            <Button
+              onClick={() =>
+                editPanel({ uid: panel.uid, description: data.description })
+              }
+              type="submit"
+            >
+              Update
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 export default function Panels() {
   const columns: ColumnDef<Panel>[] = [
     {
-      accessorKey: "id",
-      header: "ID",
+      accessorKey: "uid",
+      header: "ID"
     },
     {
       accessorKey: "width",
@@ -62,19 +113,19 @@ export default function Panels() {
       ),
     },
     {
-      accessorKey: "reportingUnits",
-      header: "Reporting Units",
+      accessorKey: "units",
+      header: "Units",
     },
     {
-      accessorKey: "horizontalResolution",
+      accessorKey: "heightScaling",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Horizontal Resolution" />
+        <DataTableColumnHeader column={column} title="Height Scaling" />
       ),
     },
     {
-      accessorKey: "verticalResolution",
+      accessorKey: "widthScaling",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Vertical Resolution" />
+        <DataTableColumnHeader column={column} title="Width Scaling" />
       ),
     },
     {
@@ -85,75 +136,38 @@ export default function Panels() {
         return (
           <div className="text-right">
             <span className="sr-only">Edit</span>
-
-            <Dialog>
-              <DialogTrigger asChild>
-                <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
-                  Edit <Pencil size={12} />
-                </span>
-              </DialogTrigger>
-              <DialogContent className="bg-white text-black">
-                <DialogHeader>
-                  <DialogTitle>Update panel {panel.id}</DialogTitle>
-                </DialogHeader>
-                <EditPanelForm editPanel={editPanel} panel={panel} />
-              </DialogContent>
-            </Dialog>
+            <EditPanelForm panel={panel} setPanels={setPanels} />
           </div>
         );
       },
     },
   ];
-  const [panels, setPanels] = useState(data);
-  const [open, setOpen] = useState(false);
-  const addPanel: (props: AddPanelProps) => void = ({
-    width,
-    height,
-    reportingUnits,
-    horizontalResolution,
-    verticalResolution,
-    description,
-  }) => {
-    setPanels([
-      ...panels,
-      {
-        id: `${panels.length + 1}`,
-        width,
-        height,
-        reportingUnits,
-        horizontalResolution,
-        verticalResolution,
-        description: description ?? "",
-      },
-    ]);
-    setOpen(false);
-  };
-  const editPanel: (props: EditPanelProps) => void = ({ id, description }) => {
-    const index = panels.findIndex((panel) => panel.id === id);
-    if (index == -1) {
-      alert("No such panel exists");
-    }
-    panels[index].description = description ?? "";
-    setPanels([...panels]);
-  };
+  const {data, loading, error, fetchData} = useFetch<Panel[]>(`/panel/view/all`);
+  const [panels, setPanels] = useState(data ?? []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData])
+  useEffect(() => {
+    setPanels(data);
+  }, [data])
+  
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between gap-2">
         <p className="font-bold">All Panels</p>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>Add Panel</Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white text-black">
-            <DialogHeader>
-              <DialogTitle>Add Panel</DialogTitle>
-            </DialogHeader>
-            <PanelForm addPanel={addPanel} />
-          </DialogContent>
-        </Dialog>
+        <PanelForm setPanels={setPanels} />
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={panels} />
+        {
+          loading ? (
+            <p>Loading...</p>
+          ) :
+          error ? (
+            <p>{error.message}</p>
+          ) : (
+            <DataTable columns={columns} dataValues={panels} />
+          )
+        }
       </CardContent>
     </Card>
   );

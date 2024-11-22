@@ -1,7 +1,7 @@
 export type User = {
-  id: string; // Unique ID for each user
-  created: Date; // Timestamp for when the user was created
-  active: boolean; // Status: Yes (true) or No (false)
+  uid: string; // Unique ID for each user
+  createdTimestamp: Date; // Timestamp for when the user was created
+  isActive: boolean; // Status: Yes (true) or No (false)
   username?: string; // User's username
 };
 
@@ -10,7 +10,7 @@ export type AddUserProps = {
 };
 
 export type EditUserProps = {
-  id: string;
+  uid: string;
   username?: string;
-  active: boolean;
+  isActive: boolean;
 };

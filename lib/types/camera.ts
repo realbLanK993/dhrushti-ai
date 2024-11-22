@@ -1,6 +1,6 @@
 export type Camera = {
-  id: string; // Unique ID for each camera
-  created: Date; // Timestamp for when the camera was added
+  uid: string; // Unique ID for each camera
+  createdTimestamp: Date; // Timestamp for when the camera was added
   manufacturer: string; // Camera's manufacturer
   model: string; // Camera's model
   serialNumber: string; // Camera's serial number
@@ -15,6 +15,6 @@ export type AddCameraProps = {
 };
 
 export type EditCameraProps = {
-  id: string;
+  uid: string;
   description?: string;
 };
