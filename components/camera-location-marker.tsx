@@ -26,12 +26,14 @@ const initialCameraData: CameraData = {
 
 export default function CameraLocationMarker({
   setIsOpen,
+  background
 }: {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  background?: string
 }) {
   const [selectedCamera, setSelectedCamera] = useState<CameraType | null>(null);
   const [cameraData, setCameraData] = useState<CameraData>(initialCameraData);
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<string | undefined>(background);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [imageDimensions, setImageDimensions] = useState<{
     width: number;
@@ -94,7 +96,7 @@ export default function CameraLocationMarker({
             <SelectItem value="Camera 3">Camera 3</SelectItem>
           </SelectContent>
         </Select>
-        <Input type="file" accept="image/*" onChange={handleImageUpload} />
+        <Input disabled type="file" accept="image/*" onChange={handleImageUpload} />
       </div>
       <div className="overflow-auto max-h-[600px]">
         <div

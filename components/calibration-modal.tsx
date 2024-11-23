@@ -180,7 +180,7 @@ export default function CalibrationModal() {
             </div>
           </TabsContent>
           <TabsContent value="camera">
-            <CameraLocationMarker setIsOpen={setIsOpen} />
+            <CameraLocationMarker setIsOpen={setIsOpen} background={backgroundImage} />
           </TabsContent>
         </Tabs>
       </DialogContent>
