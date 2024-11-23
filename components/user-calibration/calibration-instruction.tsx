@@ -12,7 +12,7 @@ export default function CalibrationInstructions({
    
   return (
     <div className="p-4 fixed inset-0 bg-background flex gap-4 justify-center items-center flex-col border rounded shadow w-screen h-screen">
-      <Button className="absolute top-10 right-10" onClick={onComplete}>Start Calibration</Button>
+      <Button className="absolute top-10 right-10 z-[100]" onClick={onComplete}>Start Calibration</Button>
       <div className="max-w-[1000px] w-full">
         <video width={1000} controls>
           <source src="/calibration-screen.mp4" type="video/mp4" />

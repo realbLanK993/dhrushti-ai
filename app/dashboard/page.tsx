@@ -3,14 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserCalibration from "@/components/user-calibration/user-calibration";
 import { ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+
 
 
 export default async function DashboardPage() {
@@ -40,28 +33,31 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 justify-end w-full">
         <CalibrationModal />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant={"outline"}>User Calibration</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-screen flex flex-col h-screen">
-            <DialogHeader className="w-fit h-fit">
-              <DialogTitle>User Calibration</DialogTitle>
-            </DialogHeader>
-            <div className="w-full h-full justify-center items-center">
-              <UserCalibration />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <UserCalibration />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tables.map((item, index) => {
           return (
-            <Link key={index} href={item.link}>
-              <Card className="min-w-[300px] min-h-[150px] hover:bg-secondary hover:text-secondary-foreground transition-colors duration-200">
+            <Link
+              key={index}
+              href={item.title == "Eye Tracker Experiments" ? "#" : item.link}
+            >
+              <Card
+                className={`min-w-[300px] min-h-[150px] ${
+                  item.title == "Eye Tracker Experiments"
+                    ? "bg-muted text-muted-foreground"
+                    : "hover:bg-secondary"
+                } hover:text-secondary-foreground transition-colors duration-200`}
+              >
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle
+                    className={`flex items-center justify-between ${
+                      item.title == "Eye Tracker Experiments"
+                        ? "text-muted-foreground"
+                        : ""
+                    }`}
+                  >
                     <p>{item.title}</p>
                     <span>
                       <ExternalLinkIcon size={18} />

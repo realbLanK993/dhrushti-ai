@@ -1,7 +1,13 @@
-"use client"
-import { useEffect, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useFetch } from "@/lib/hooks";
+
+const STEP_DURATION = 2000;
+const ITERATION_DURATION = 4000;
+const DURATION_BETWEEN_ITERATIONS = 2000;
+
 export default function CalibrationProcess({
   userUID,
   panelUID,
@@ -22,52 +28,95 @@ export default function CalibrationProcess({
     { x: "50%", y: "100%" },
     { x: "100%", y: "100%" },
   ];
+
   const startCalibration = useFetch(`/et/calib/user/start`);
   const startRecordingUserCalibration = useFetch(`/et/calib/user/record/start`);
   const stopRecordingUserCalibration = useFetch(`/et/calib/user/record/stop`);
   const stopCalibration = useFetch(`/et/calib/user/stop`);
+
   const [currentDotIndex, setCurrentDotIndex] = useState(0);
   const [green, setGreen] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startRecording = useCallback(() => {
+    return startRecordingUserCalibration.fetchData({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userUID, panelUID }),
+    })
+  }, [startRecordingUserCalibration, userUID, panelUID]);
+
+  const stopRecording = useCallback(() => {
+    return stopRecordingUserCalibration.fetchData({
+      method: "POST",
+    })
+  },[stopRecordingUserCalibration]);
+
   useEffect(() => {
-    startCalibration.fetchData({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userUID, panelUID }) });
-  },[]);
-  useEffect(() => {
-    if (currentDotIndex === 8) return;
-    setTimeout(() => {
-      startRecordingUserCalibration.fetchData({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pointUID: currentDotIndex +1}) });
-      setGreen(true);
-    }, 3000);
-    setTimeout(() => {
-      stopRecordingUserCalibration.fetchData({ method: "POST"});
-      setGreen(false);
-    }, 5000); 
-    const interval = setInterval(() => {
-      setCurrentDotIndex((prev) => {
-        return prev + 1;
-      });
-    }, 6000);
-    if (currentDotIndex === 8) {
-      stopCalibration.fetchData({ method: "POST"});
-      onComplete();
-      clearInterval(interval);
-      setCurrentDotIndex(-1);
+    startCalibration.fetchData({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userUID, panelUID }),
+    });
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-    return () => clearInterval(interval);
-  }, [currentDotIndex]);
+  }, []);
+
+  const eachIteration = useCallback(async () => {
+    setGreen(true);
+    await startRecording();
+    await new Promise((resolve) => setTimeout(resolve, STEP_DURATION));
+    setGreen(false);
+    await stopRecording();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setCurrentDotIndex((prev) => prev + 1);
+    if (currentDotIndex == 8) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      await stopCalibration
+        .fetchData({ method: "POST" })
+        .then(() => {
+          console.log("called stop calibration");
+          onComplete();
+        })
+        .catch((err) => console.log(err));
+      return;
+    }
+  }, [
+    currentDotIndex,
+    startRecording,
+    stopRecording,
+    stopCalibration,
+    onComplete,
+  ]);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(eachIteration, ITERATION_DURATION);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [eachIteration]);
 
   return (
     <div className="inset-0 cursor-none fixed p-8 bg-red-600 rounded-lg flex items-center justify-center">
       <div className="relative w-full h-full">
-        {currentDotIndex !== -1 && (
+        {currentDotIndex < 9 && (
           <motion.div
-            className={`w-6 h-6 z-10 rounded-full ${
-              green ? "bg-green-400" : "bg-blue-400"
-            } absolute`}
+            className={`w-6 h-6 z-10 rounded-full absolute`}
             animate={{
               left: dotPositions[currentDotIndex].x,
               top: dotPositions[currentDotIndex].y,
+              backgroundColor: green ? "#4ade80" : "#60a5fa",
             }}
-            transition={{ duration: 2 }}
+            transition={{ duration: DURATION_BETWEEN_ITERATIONS / 1000 }}
             style={{
               transform: "translate(-50%, -50%)",
             }}
