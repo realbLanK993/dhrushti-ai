@@ -1,4 +1,3 @@
-import CalibrationModal from "@/components/calibration-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserCalibration from "@/components/user-calibration/user-calibration";
 import { ExternalLinkIcon } from "lucide-react";
@@ -32,7 +31,6 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 justify-end w-full">
-        <CalibrationModal />
         <UserCalibration />
       </div>
 
@@ -41,22 +39,14 @@ export default async function DashboardPage() {
           return (
             <Link
               key={index}
-              href={item.title == "Eye Tracker Experiments" ? "#" : item.link}
+              href={item.link}
             >
               <Card
-                className={`min-w-[300px] min-h-[150px] ${
-                  item.title == "Eye Tracker Experiments"
-                    ? "bg-muted text-muted-foreground"
-                    : "hover:bg-secondary"
-                } hover:text-secondary-foreground transition-colors duration-200`}
+                className={`min-w-[300px] min-h-[150px] hover:bg-secondary hover:text-secondary-foreground transition-colors duration-200`}
               >
                 <CardHeader>
                   <CardTitle
-                    className={`flex items-center justify-between ${
-                      item.title == "Eye Tracker Experiments"
-                        ? "text-muted-foreground"
-                        : ""
-                    }`}
+                    className={`flex items-center justify-between`}
                   >
                     <p>{item.title}</p>
                     <span>

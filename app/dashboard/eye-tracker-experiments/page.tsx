@@ -1,157 +1,59 @@
 "use client";
 
+import CalibrationModal from "@/components/calibration-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { DataTable } from "@/components/table";
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontalIcon } from "lucide-react";
-import {
-  EditEyeTrackerExperimentsForm,
-  EyeTrackerExperimentsForm,
-} from "@/components/form/eye-tracker-experiments/form";
-import {
-  AddEyeTrackerExperimentsProps,
-  EditEyeTrackerExperimentsProps,
-  EyeTrackerExperiment,
-} from "@/lib/types/eye-tracker-experiments";
-import { useState } from "react";
-
-const data: EyeTrackerExperiment[] = [
-  {
-    id: "experiment_1",
-    eyeTrackerProfileId: "profile_1",
-    created: new Date("2023-12-18T14:10:00"),
-    description: "Desc 1",
-  },
-  {
-    id: "experiment_2",
-    eyeTrackerProfileId: "profile_2",
-    created: new Date("2024-02-25T09:25:00"),
-    description: "Desc 2",
-  },
-  {
-    id: "experiment_3",
-    eyeTrackerProfileId: "profile_3",
-    created: new Date("2024-05-10T12:40:00"),
-    description: "Desc 3",
-  },
-];
+import { useFetch } from "@/lib/hooks";
+import { useEffect, useState } from "react";
 
 export default function EyeTrackerExperiments() {
-  const [eyeTrackerExperiments, setEyeTrackerExperiments] = useState(data);
-  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<boolean>(false);
+  const eyeTrackerStatus = useFetch<boolean>("/et/run/status");
+  const eyeTrackerStart = useFetch<string>("/et/run/start");
+  const eyeTrackerStop = useFetch<string>("/et/run/stop");
+  useEffect(() => {
+    setStatus(eyeTrackerStatus.data);
+  }, [eyeTrackerStatus.data]);
+  useEffect(() => {
+    eyeTrackerStatus.fetchData();
+  }, [eyeTrackerStatus.fetchData]);
 
-  const addEyeTrackerExperiment: (
-    props: AddEyeTrackerExperimentsProps
-  ) => void = ({ description }) => {
-    setEyeTrackerExperiments([
-      ...eyeTrackerExperiments,
-      {
-        id: `experiment_${eyeTrackerExperiments.length + 1}`,
-        eyeTrackerProfileId: `profile_${eyeTrackerExperiments.length + 1}`,
-        created: new Date(),
-        description: description ?? "",
-      },
-    ]);
-    setOpen(false);
-  };
-
-  const editEyeTrackerExperiment: (
-    props: EditEyeTrackerExperimentsProps
-  ) => void = ({ id, description }) => {
-    const index = eyeTrackerExperiments.findIndex(
-      (experiment) => experiment.id === id
-    );
-    if (index == -1) {
-      alert("No such experiment exists");
-    }
-    const updatedEyeTrackerExperiments = [...eyeTrackerExperiments];
-    updatedEyeTrackerExperiments[index].description = description ?? "";
-    setEyeTrackerExperiments(updatedEyeTrackerExperiments);
-    setOpen(false);
-  };
-
-  const columns: ColumnDef<EyeTrackerExperiment>[] = [
-    {
-      accessorKey: "id",
-      header: "ID",
-    },
-    {
-      accessorKey: "eyeTrackerProfileId",
-      header: "Profile ID",
-    },
-    {
-      accessorKey: "created",
-      header: "Created",
-    },
-    {
-      id: "action",
-      header: "Action",
-      cell: ({ row }) => {
-        const experiment = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <MoreHorizontalIcon size={16} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Edit
-                  </DropdownMenuItem>
-                </DialogTrigger>
-                <DialogContent className="bg-white text-black">
-                  <DialogHeader>
-                    <DialogTitle>Edit Experiment {experiment.id}</DialogTitle>
-                  </DialogHeader>
-                  <EditEyeTrackerExperimentsForm
-                    editEyeTrackerExperiment={editEyeTrackerExperiment}
-                    experiment={experiment}
-                  />
-                </DialogContent>
-              </Dialog>
-              <DropdownMenuItem>Download</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
-  ];
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">All Eye Tracker Experiments</p>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>Start New</Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white text-black">
-            <DialogHeader>
-              <DialogTitle>Start New Experiment</DialogTitle>
-            </DialogHeader>
-            <EyeTrackerExperimentsForm
-              addEyeTrackerExperiment={addEyeTrackerExperiment}
-            />
-          </DialogContent>
-        </Dialog>
+        <p className="font-bold">Eye Tracker</p>
+        {eyeTrackerStatus.loading ? (
+          <Button variant="outline" disabled>
+            Loading
+          </Button>
+        ) : status ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              eyeTrackerStop.fetchData({
+                method: "POST",
+              });
+              setStatus(false);
+            }}
+          >
+            Stop
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={() => {
+              eyeTrackerStart.fetchData({
+                method: "POST",
+              });
+              setStatus(true);
+            }}
+          >
+            Start
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} dataValues={eyeTrackerExperiments} />
+        <CalibrationModal />
       </CardContent>
     </Card>
   );
