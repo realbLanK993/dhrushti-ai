@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/table/column-header";
@@ -152,23 +152,25 @@ export default function Panels() {
   }, [data])
   
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">All Panels</p>
-        <PanelForm setPanels={setPanels} />
-      </CardHeader>
-      <CardContent>
-        {
-          loading ? (
-            <p>Loading...</p>
-          ) :
-          error ? (
-            <p>{error.message}</p>
+    <div className="px-8 py-24">
+      <Card>
+        <CardHeader className="flex flex-row justify-between gap-2">
+          <p className="font-bold">All Panels</p>
+          <PanelForm setPanels={setPanels} />
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
+              <Loader2 size={16} className="animate-spin" />
+              Loading...
+            </p>
+          ) : error ? (
+            <p>{`Error Fetching Resources: ${error.message}`}</p>
           ) : (
             <DataTable columns={columns} dataValues={panels} />
-          )
-        }
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

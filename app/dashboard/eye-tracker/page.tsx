@@ -11,12 +11,13 @@ import {
 } from "@/lib/types/eye-tracker";
 import { useEffect, useState } from "react";
 import { useFetch } from "@/lib/hooks";
+import { Loader2 } from "lucide-react";
 
 
 export default function EyeTracker() {
   const [eyeTrackerProfiles, setEyeTrackerProfiles] =
     useState<EyeTrackerProfile[]>([]);
-    const {data,fetchData} = useFetch<EyeTrackerProfile[]>(`/et/profile/view/all`);
+    const {data,fetchData, error, loading} = useFetch<EyeTrackerProfile[]>(`/et/profile/view/all`);
     useEffect(() => {
       fetchData();
     }, [fetchData]);
@@ -58,14 +59,30 @@ export default function EyeTracker() {
 
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">All Eye Tracker Profiles</p>
-        <EyeTrackerForm eyeTrackerProfiles={eyeTrackerProfiles} setEyeTrackerProfiles={setEyeTrackerProfiles} />
-      </CardHeader>
-      <CardContent>
-        <DataTable columns={columns} dataValues={eyeTrackerProfiles} />
-      </CardContent>
-    </Card>
+    <div className="px-8 py-24">
+      <Card>
+        <CardHeader className="flex flex-row justify-between gap-2">
+          <p className="font-bold">All Eye Tracker Profiles</p>
+          <EyeTrackerForm
+            eyeTrackerProfiles={eyeTrackerProfiles}
+            setEyeTrackerProfiles={setEyeTrackerProfiles}
+          />
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
+              <Loader2 size={16} className="animate-spin" />
+              Loading...
+            </p>
+          ) : error ? (
+            <p>{`Error Fetching Resources: ${error.message}`}</p>
+          ) : (
+            !error && (
+              <DataTable columns={columns} dataValues={eyeTrackerProfiles} />
+            )
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

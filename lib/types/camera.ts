@@ -1,6 +1,6 @@
 export type Camera = {
   uid: string; // Unique ID for each camera
-  createdTimestamp: Date; // Timestamp for when the camera was added
+  createdTimestamp: string; // Timestamp for when the camera was added
   manufacturer: string; // Camera's manufacturer
   model: string; // Camera's model
   serialNumber: string; // Camera's serial number

@@ -19,42 +19,44 @@ export default function EyeTrackerExperiments() {
   }, [eyeTrackerStatus.fetchData]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">Eye Tracker</p>
-        {eyeTrackerStatus.loading ? (
-          <Button variant="outline" disabled>
-            Loading
-          </Button>
-        ) : status ? (
-          <Button
-            variant="outline"
-            onClick={() => {
-              eyeTrackerStop.fetchData({
-                method: "POST",
-              });
-              setStatus(false);
-            }}
-          >
-            Stop
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={() => {
-              eyeTrackerStart.fetchData({
-                method: "POST",
-              });
-              setStatus(true);
-            }}
-          >
-            Start
-          </Button>
-        )}
-      </CardHeader>
-      <CardContent>
-        <CalibrationModal />
-      </CardContent>
-    </Card>
+    <div className="px-8 py-24">
+      <Card>
+        <CardHeader className="flex flex-row justify-between gap-2">
+          <p className="font-bold">Eye Tracker</p>
+          {eyeTrackerStatus.loading ? (
+            <Button variant="outline" disabled>
+              Loading
+            </Button>
+          ) : status ? (
+            <Button
+              variant="outline"
+              onClick={() => {
+                eyeTrackerStop.fetchData({
+                  method: "POST",
+                });
+                setStatus(false);
+              }}
+            >
+              Stop
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => {
+                eyeTrackerStart.fetchData({
+                  method: "POST",
+                });
+                setStatus(true);
+              }}
+            >
+              Start
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          <CalibrationModal />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

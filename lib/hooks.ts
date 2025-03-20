@@ -20,7 +20,7 @@ export const useFetch= <T,>(url: string) => {
         setData(jsonData.response.data);
         setSuccess(jsonData.response.success);
       } catch (error) {
-        alert(JSON.stringify(error))
+        // alert(JSON.stringify(error))
         setError(error as Error);
         setSuccess(false);
       } finally {

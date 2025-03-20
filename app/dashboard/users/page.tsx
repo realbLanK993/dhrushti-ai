@@ -7,6 +7,7 @@ import { EditUserForm, UserForm } from "@/components/form/users/form";
 import { useEffect, useState } from "react";
 import {  User } from "@/lib/types/user";
 import { useFetch } from "@/lib/hooks";
+import { Loader2 } from "lucide-react";
 
 
 export default function Users() {
@@ -56,16 +57,25 @@ export default function Users() {
     },
   ];
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">All Users</p>
-        <UserForm setUsers={setUsers} />
-      </CardHeader>
-      <CardContent>
-        {
-          !loading && !error && <DataTable dataValues={users} columns={columns} />
-        }
-      </CardContent>
-    </Card>
+    <div className="px-8 py-24">
+      <Card>
+        <CardHeader className="flex flex-row justify-between gap-2">
+          <p className="font-bold">All Users</p>
+          <UserForm setUsers={setUsers} />
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
+              <Loader2 size={16} className="animate-spin" />
+              Loading...
+            </p>
+          ) : error ? (
+            <p>{`Error Fetching Resources: ${error.message}`}</p>
+          ) : !error && (
+            <DataTable dataValues={users} columns={columns} />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

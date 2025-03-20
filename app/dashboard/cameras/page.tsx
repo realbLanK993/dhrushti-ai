@@ -154,23 +154,25 @@ export default function Cameras() {
   }, [data]);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row justify-between gap-2">
-        <p className="font-bold">All Cameras</p>
-        <CameraForm setData={setCameras} />
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
-            <Loader2 size={16} className="animate-spin" />
-            Loading...
-          </p>
-        ) : error ? (
-          <p>{error.message}</p>
-        ) : (
-          <DataTable columns={columns} dataValues={cameras} />
-        )}
-      </CardContent>
-    </Card>
+    <div className="py-24 px-8">
+      <Card>
+        <CardHeader className="flex flex-row justify-between gap-2">
+          <p className="font-bold">All Cameras</p>
+          <CameraForm setData={setCameras} />
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="flex gap-2 justify-center items-center flex-1 w-full h-full">
+              <Loader2 size={16} className="animate-spin" />
+              Loading...
+            </p>
+          ) : error ? (
+            <p>{`Error Fetching Resources: ${error.message}`}</p>
+          ) : (
+            <DataTable columns={columns} dataValues={cameras} />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
