@@ -51,7 +51,7 @@ export function Navbar() {
   return (
     <Breadcrumb className="p-4 absolute">
       <BreadcrumbList>
-        {pathSegments.map((segment, index) => (
+        {pathSegments.map((segment) => (
           <div key={segment.href} className="flex items-center">
             <BreadcrumbItem>
               {segment.isLast ? (

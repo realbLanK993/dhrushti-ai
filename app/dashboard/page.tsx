@@ -1,38 +1,34 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import UserCalibration from "@/components/user-calibration/user-calibration";
-import { ChartNoAxesCombined, ExternalLinkIcon, FlaskConical } from "lucide-react";
-import Link from "next/link";
-import Cameras from "./cameras/page";
-import SimpleCameraTable from "@/components/form/camera/simple";
-import { Rightbar } from "@/components/layout/rightbar";
+
+
+
+import { FlaskConical } from "lucide-react";
 import { FakeChart } from "@/components/form/fake-chart";
 
 
 
 export default async function DashboardPage() {
-  const tables = [
-    {
-      title: "Cameras",
-      link: "dashboard/cameras",
-    },
-    {
-      title: "Panels",
-      link: "dashboard/panels",
-    },
-    {
-      title: "Eye Tracker Profiles",
-      link: "dashboard/eye-tracker",
-    },
-    {
-      title: "Users",
-      link: "dashboard/users",
-    },
-    {
-      title: "Eye Tracker Experiments",
-      link: "dashboard/eye-tracker-experiments",
-    },
-  ];
+  // const tables = [
+  //   {
+  //     title: "Cameras",
+  //     link: "dashboard/cameras",
+  //   },
+  //   {
+  //     title: "Panels",
+  //     link: "dashboard/panels",
+  //   },
+  //   {
+  //     title: "Eye Tracker Profiles",
+  //     link: "dashboard/eye-tracker",
+  //   },
+  //   {
+  //     title: "Users",
+  //     link: "dashboard/users",
+  //   },
+  //   {
+  //     title: "Eye Tracker Experiments",
+  //     link: "dashboard/eye-tracker-experiments",
+  //   },
+  // ];
   return (
     <div className="flex w-full flex-1 overflow-hidden max-h-screen">
       <div className="flex flex-col gap-8 w-full  px-8 pt-24">
@@ -41,10 +37,10 @@ export default async function DashboardPage() {
           <p className="pl-1">Hi Manish. Have a nice day at work! 👋</p>
         </div>
         <div className="flex flex-col gap-4 pb-4 w-full overflow-auto">
+          {/* <SimpleCameraTable />
           <SimpleCameraTable />
           <SimpleCameraTable />
-          <SimpleCameraTable />
-          <SimpleCameraTable />
+          <SimpleCameraTable /> */}
         </div>
       </div>
       <div className="p-8 w-full max-w-[500px] relative border-l border-gray-200 overflow-hidden">

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron": "electron electron/main.js"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -23,6 +24,7 @@
     "@tanstack/react-table": "^8.20.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "electron-store": "^10.0.1",
     "lucide-react": "^0.439.0",
     "motion": "^11.11.17",
     "next": "14.2.8",
@@ -36,6 +38,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "electron": "^35.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.8",
     "postcss": "^8",

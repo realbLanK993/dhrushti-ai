@@ -1,4 +1,4 @@
-import { Blocks, Calendar, Camera, FlaskConical, Home, Inbox, LayoutDashboard, LogOut, Monitor, ScanEye, Search, Settings, User, UserPen, Users } from "lucide-react";
+import {  Camera, FlaskConical, LayoutDashboard, LogOut, Monitor, ScanEye, User, UserPen } from "lucide-react";
 
 import {
   Sidebar,
@@ -11,9 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "../ui/button";
 import Image from "next/image";
 
 // Menu items.
