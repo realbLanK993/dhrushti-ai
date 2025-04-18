@@ -21,19 +21,19 @@ export const UserForm = ({
   const [username, setUsername] = useState<string>("");
   const [open, setOpen] = useState(false);
   const addUsers: (props: AddUserProps) => void = ({ username }) => {
-      setUsers((prev) => [
-        ...prev,
-        {
-          uid: `user_${prev.length + 1}`,
-          createdTimestamp: new Date(),
-          isActive: true,
-          username: username ?? "",
-        },
-      ]);
-    };
+    setUsers((prev) => [
+      ...prev,
+      {
+        uid: `user_${prev.length + 1}`,
+        createdTimestamp: new Date(),
+        isActive: true,
+        username: username ?? "",
+      },
+    ]);
+  };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger disabled asChild>
+      <DialogTrigger asChild>
         <Button>Add User</Button>
       </DialogTrigger>
       <DialogContent className="bg-white text-black">
@@ -73,7 +73,7 @@ export const EditUserForm = ({
     username,
     isActive,
   }) => {
-    setUsers(prev => {
+    setUsers((prev) => {
       const index = prev.findIndex((user) => user.uid === uid);
       if (index == -1) {
         alert("No such User exists");
@@ -81,11 +81,11 @@ export const EditUserForm = ({
       prev[index].username = username ?? "";
       prev[index].isActive = isActive;
       return [...prev];
-    })
+    });
   };
   return (
     <Dialog>
-      <DialogTrigger disabled className="text-muted-foreground p-2 px-8 rounded bg-muted">
+      <DialogTrigger className="">
         <span className="underline w-full cursor-pointer flex gap-2 justify-end items-center">
           Edit <Pencil size={12} />
         </span>

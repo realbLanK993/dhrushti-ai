@@ -22,18 +22,18 @@ import { useFetch } from "@/lib/hooks";
 import { Loader2 } from "lucide-react";
 
 export const CameraForm = ({
-  setData
-}:{
-  setData: React.Dispatch<React.SetStateAction<Camera[]>>
+  setData,
+}: {
+  setData: React.Dispatch<React.SetStateAction<Camera[]>>;
 }) => {
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
-  const { data,loading, error, fetchData } = useFetch<Camera>("/camera/add");
+  const { data, loading, error, fetchData } = useFetch<Camera>("/camera/add");
   useEffect(() => {
     if (data) {
-      setData(prev => [data,...prev ]);
+      setData((prev) => [data, ...prev]);
     }
-  },[data, setData])
+  }, [data, setData]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -103,27 +103,34 @@ export const CameraForm = ({
               />
             </div>
             <DialogFooter>
-              <Button disabled={loading} onClick={() => {
-                const newCamera = {
+              <Button
+                disabled={loading}
+                onClick={() => {
+                  const newCamera = {
                     manufacturer: "basler",
                     model: "acA1440-220um",
                     serialNumber: "SN123456789",
                     description,
-                  }
-                fetchData({
-                  method: "POST",
-                  headers:{
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(newCamera),
-                })
-                setOpen(false);
-                 }} type="submit">
-                {
-                  loading
-                    ? <span className="flex gap-2 items-center"> <Loader2 className="animate-spin" size={16} /> Loading</span>
-                    : "Add "
-                }
+                  };
+                  fetchData({
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(newCamera),
+                  });
+                  setOpen(false);
+                }}
+                type="submit"
+              >
+                {loading ? (
+                  <span className="flex gap-2 items-center">
+                    {" "}
+                    <Loader2 className="animate-spin" size={16} /> Loading
+                  </span>
+                ) : (
+                  "Add "
+                )}
               </Button>
             </DialogFooter>
           </div>
@@ -132,4 +139,3 @@ export const CameraForm = ({
     </Dialog>
   );
 };
-

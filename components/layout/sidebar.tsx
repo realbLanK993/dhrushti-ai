@@ -1,4 +1,13 @@
-import {  Camera, FlaskConical, LayoutDashboard, LogOut, Monitor, ScanEye, User, UserPen } from "lucide-react";
+import {
+  Camera,
+  FlaskConical,
+  LayoutDashboard,
+  LogOut,
+  Monitor,
+  ScanEye,
+  User,
+  UserPen,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -49,6 +58,11 @@ const items = [
 ];
 
 const account = [
+  {
+    title: "Configurations",
+    url: "/dashboard/configs",
+    icon: User,
+  },
   {
     title: "Profile",
     url: "/dashboard/profile",

@@ -14,7 +14,7 @@ import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Loader2, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Camera } from "@/lib/types/camera";
+import { Camera, EditCameraProps } from "@/lib/types/camera";
 import { useFetch } from "@/lib/hooks";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +30,7 @@ const EditCameraForm = ({
   const { response, fetchData } = useFetch(`/camera/update`);
   const [data, setData] = useState({ ...camera });
   const [open, setOpen] = useState(false);
-  const editCamera = (body: { uid: string; description: string }) => {
+  const editCamera = (body: EditCameraProps) => {
     return fetchData({
       method: "PATCH",
       headers: {
@@ -40,23 +40,23 @@ const EditCameraForm = ({
     })
       .then(() => {
         console.log(response, "check");
-          setCameras((prev) => {
-            const index = prev.findIndex((c) => {
-              return c.uid === camera.uid;
-            });
-
-            if (index == -1) {
-              alert("No such camera exists");
-            }
-            prev[index].description = data.description ?? "";
-            return [...prev];
+        setCameras((prev) => {
+          const index = prev.findIndex((c) => {
+            return c.uid === camera.uid;
           });
-        
+
+          if (index == -1) {
+            alert("No such camera exists");
+          }
+          prev[index].description = data.description ?? "";
+          return [...prev];
+        });
       })
       .catch((err) => {
         console.log("Error: \n", err);
-      }).finally(() => setOpen(false));
-  }
+      })
+      .finally(() => setOpen(false));
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -92,7 +92,8 @@ const EditCameraForm = ({
             <Button
               onClick={() =>
                 editCamera({
-                  uid: data.uid,
+                  cameraUID: data.uid,
+                  isActive: data.isActive,
                   description: data.description ?? "",
                 })
               }
@@ -113,7 +114,7 @@ export default function Cameras() {
   const [cameras, setCameras] = useState<Camera[]>(data ?? []);
   useEffect(() => {
     console.log("cameras", cameras);
-  }, [cameras])
+  }, [cameras]);
   const columns: ColumnDef<Camera>[] = [
     {
       accessorKey: "uid",
@@ -134,6 +135,14 @@ export default function Cameras() {
     {
       accessorKey: "serialNumber",
       header: "Serial Number",
+    },
+    {
+      accessorKey: "isActive",
+      header: "Active",
+      cell: ({ row }) => {
+        const camera = row.original;
+        return camera.isActive ? "Yes" : "No";
+      },
     },
     {
       accessorKey: "action",
