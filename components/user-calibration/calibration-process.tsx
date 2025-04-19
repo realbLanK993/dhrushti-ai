@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useFetch } from "@/lib/hooks";
 
-const STEP_DURATION = 2000;
-const ITERATION_DURATION = 4000;
-const DURATION_BETWEEN_ITERATIONS = 2000;
+const STEP_DURATION = 200;
+const ITERATION_DURATION = 400;
+const DURATION_BETWEEN_ITERATIONS = 200;
 
 export default function CalibrationProcess({
   userUID,
@@ -29,28 +29,35 @@ export default function CalibrationProcess({
     { x: "100%", y: "100%" },
   ];
 
-  const startCalibration = useFetch(`/et/calib/user/start`);
-  const startRecordingUserCalibration = useFetch(`/et/calib/user/record/start`);
-  const stopRecordingUserCalibration = useFetch(`/et/calib/user/record/stop`);
-  const stopCalibration = useFetch(`/et/calib/user/stop`);
+  const startCalibration = useFetch(`/user/calibration/start`);
+  const startRecordingUserCalibration = useFetch(
+    `/user/calibration/record/start`
+  );
+  const stopRecordingUserCalibration = useFetch(
+    `/user/calibration/record/stop`
+  );
+  const stopCalibration = useFetch(`/user/calibration/stop`);
 
   const [currentDotIndex, setCurrentDotIndex] = useState(0);
   const [green, setGreen] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startRecording = useCallback(() => {
-    return startRecordingUserCalibration.fetchData({
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userUID, panelUID }),
-    })
-  }, [startRecordingUserCalibration, userUID, panelUID]);
+  const startRecording = useCallback(
+    (pointIdx: number) => {
+      return startRecordingUserCalibration.fetchData({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pointIdx }),
+      });
+    },
+    [startRecordingUserCalibration, userUID, panelUID]
+  );
 
   const stopRecording = useCallback(() => {
     return stopRecordingUserCalibration.fetchData({
       method: "POST",
-    })
-  },[stopRecordingUserCalibration]);
+    });
+  }, [stopRecordingUserCalibration]);
 
   useEffect(() => {
     startCalibration.fetchData({
@@ -68,7 +75,7 @@ export default function CalibrationProcess({
 
   const eachIteration = useCallback(async () => {
     setGreen(true);
-    await startRecording();
+    await startRecording(currentDotIndex + 1);
     await new Promise((resolve) => setTimeout(resolve, STEP_DURATION));
     setGreen(false);
     await stopRecording();

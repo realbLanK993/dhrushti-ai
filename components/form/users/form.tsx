@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Pencil } from "lucide-react";
+import { useFetch } from "@/lib/hooks";
 export const UserForm = ({
   setUsers,
 }: {
@@ -20,16 +21,27 @@ export const UserForm = ({
 }) => {
   const [username, setUsername] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const addUsers: (props: AddUserProps) => void = ({ username }) => {
-    setUsers((prev) => [
-      ...prev,
-      {
-        uid: `user_${prev.length + 1}`,
-        createdTimestamp: new Date(),
-        isActive: true,
-        username: username ?? "",
+  const { fetchData, error, loading } = useFetch<User>("/user/add");
+  const addUsers: (props: AddUserProps) => void = async (props) => {
+    await fetchData({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    ]);
+      body: JSON.stringify(props),
+    });
+    if (!error) {
+      setUsers((prev) => [
+        {
+          uid: `${prev.length + 1}`,
+          createdTimestamp: new Date(),
+          isActive: true,
+          username: username ?? "",
+        },
+        ...prev,
+      ]);
+      setOpen(false);
+    }
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>

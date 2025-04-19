@@ -2,7 +2,14 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,21 +19,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import {Panel } from "@/lib/types/panel";
+import { Panel } from "@/lib/types/panel";
 import { useFetch } from "@/lib/hooks";
 
-export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateAction<Panel[]>>}) => {
+export const PanelForm = ({
+  setPanels,
+}: {
+  setPanels: React.Dispatch<React.SetStateAction<Panel[]>>;
+}) => {
   const [isMM, setIsMM] = useState(true);
   const [width, setWidth] = useState<number>();
   const [height, setHeight] = useState<number>();
-  const [units, setUnits] = useState<"mm" | "pixels">("mm");
+  const [units, setUnits] = useState<"mm" | "pixel">("mm");
   const [widthScaling, setWidthScaling] = useState<number>(1);
   const [heightScaling, setHeightScaling] = useState<number>(1);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [open, setOpen] = useState(false);
   const { fetchData } = useFetch<Panel>("/panel/add");
-  
+
   const addPanelForm = () => {
     return fetchData({
       method: "POST",
@@ -34,44 +45,44 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        width,
-        height,
+        widthMM: width,
+        heightMM: height,
         units,
-        widthScaling,
-        heightScaling,
+        width: widthScaling,
+        height: heightScaling,
         description,
-        points: [
-          [1, 2],
-          [3, 4],
-        ],
+        points: [],
+        unitsType: "int",
       }),
-    }).then(() => {
-      if (!width || !height) {
-        setError("Width and Height are required");
-        return;
-      }
-      if (!isMM && (!widthScaling || !heightScaling)) {
-        setError("Horizontal and Vertical Resolution are required");
-        return;
-      }
-      
-      setPanels((prev) => [
-        {
-          uid: `${prev.length + 1}`,
-          width,
-          height,
-          units,
-          widthScaling,
-          heightScaling,
-          description: description ?? "",
-        },
-        ...prev,
-      ]);
-    }).catch(err => {
-      console.log("Error: \n", err);
-    }).finally(() => setOpen(false));
-    
-  }
+    })
+      .then(() => {
+        if (!width || !height) {
+          setError("Width and Height are required");
+          return;
+        }
+        if (!isMM && (!widthScaling || !heightScaling)) {
+          setError("Horizontal and Vertical Resolution are required");
+          return;
+        }
+
+        setPanels((prev) => [
+          {
+            uid: `${prev.length + 1}`,
+            width,
+            height,
+            units,
+            widthScaling,
+            heightScaling,
+            description: description ?? "",
+          },
+          ...prev,
+        ]);
+      })
+      .catch((err) => {
+        console.log("Error: \n", err);
+      })
+      .finally(() => setOpen(false));
+  };
   useEffect(() => {
     const clearError = setTimeout(() => {
       setError("");
@@ -119,7 +130,7 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
             <Select
               onValueChange={(e) => {
                 setIsMM(e === "mm");
-                setUnits(e as "mm" | "pixels");
+                setUnits(e as "mm" | "pixel");
               }}
               defaultValue="mm"
               required
@@ -131,7 +142,7 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
                 <SelectItem defaultChecked value="mm">
                   mm
                 </SelectItem>
-                <SelectItem value="pixels">pixels</SelectItem>
+                <SelectItem value="pixel">pixel</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -143,9 +154,7 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
                 </Label>
                 <Input
                   value={widthScaling ?? ""}
-                  onChange={(e) =>
-                    setWidthScaling(parseInt(e.target.value))
-                  }
+                  onChange={(e) => setWidthScaling(parseInt(e.target.value))}
                   required
                   id="horizontalResolution"
                   type="number"
@@ -157,9 +166,7 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
                 </Label>
                 <Input
                   value={heightScaling ?? ""}
-                  onChange={(e) =>
-                    setHeightScaling(parseInt(e.target.value))
-                  }
+                  onChange={(e) => setHeightScaling(parseInt(e.target.value))}
                   required
                   id="verticalResolution"
                   type="number"
@@ -195,4 +202,3 @@ export const PanelForm = ({setPanels}:{setPanels: React.Dispatch<React.SetStateA
     </Dialog>
   );
 };
-

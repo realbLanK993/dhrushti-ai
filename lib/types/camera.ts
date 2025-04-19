@@ -20,3 +20,22 @@ export type EditCameraProps = {
   description?: string;
   isActive: boolean;
 };
+
+export type CameraConfigType = {
+  uid: string;
+  createdTimestamp: string;
+  cameraUID: string;
+  imageWidth: number;
+  imageHeight: number;
+  pixelFormat: "Mono8";
+  exposureTime: number;
+  triggerSelector: "FrameStart";
+  triggerSource: "Line1" | "Line2" | "Line3" | "Line4";
+  triggerActivation: "RisingEdge" | "FallingEdge";
+  triggerDelay: number;
+  gain: number;
+  noiseReduction: number;
+  sharpnessEnhancement: number;
+  blackLevel: number;
+  gamma: number;
+};

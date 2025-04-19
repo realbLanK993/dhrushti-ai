@@ -42,6 +42,11 @@ export default function UserCalibration() {
       document.exitFullscreen();
     }
   }
+  function reset() {
+    setStep(CalibrationStep.Selection);
+    setSelectedPanel("");
+    setSelectedUser("");
+  }
 
   useEffect(() => {
     function alertFullScreen() {
@@ -90,7 +95,7 @@ export default function UserCalibration() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={"outline"}>User Calibration</Button>
+        <Button>User Calibration</Button>
       </DialogTrigger>
       <DialogContent className="max-w-screen flex flex-col h-screen">
         <DialogHeader className="w-fit h-fit">
@@ -126,7 +131,13 @@ export default function UserCalibration() {
                 </span>
               </div>
               <DialogClose asChild>
-                <Button onClick={toggleFullScreen} variant={"outline"}>
+                <Button
+                  onClick={() => {
+                    toggleFullScreen();
+                    reset();
+                  }}
+                  variant={"outline"}
+                >
                   Close
                 </Button>
               </DialogClose>

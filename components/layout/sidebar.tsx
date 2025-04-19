@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   LogOut,
   Monitor,
+  MonitorCog,
   ScanEye,
   User,
   UserPen,
@@ -41,6 +42,11 @@ const items = [
     icon: Monitor,
   },
   {
+    title: "Controllers",
+    url: "/dashboard/controllers",
+    icon: MonitorCog,
+  },
+  {
     title: "User Profiles",
     url: "/dashboard/users",
     icon: UserPen,
@@ -51,7 +57,7 @@ const items = [
     icon: ScanEye,
   },
   {
-    title: "Eye Tracker Expermients",
+    title: "Eye Tracker Experiments",
     url: "/dashboard/eye-tracker-experiments",
     icon: FlaskConical,
   },
@@ -59,8 +65,8 @@ const items = [
 
 const account = [
   {
-    title: "Configurations",
-    url: "/dashboard/configs",
+    title: "Calibrations",
+    url: "/dashboard/calibration",
     icon: User,
   },
   {

@@ -5,23 +5,22 @@ import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
 import { EditUserForm, UserForm } from "@/components/form/users/form";
 import { useEffect, useState } from "react";
-import {  User } from "@/lib/types/user";
+import { User } from "@/lib/types/user";
 import { useFetch } from "@/lib/hooks";
 import { Loader2 } from "lucide-react";
-
+import { formatDateTime } from "@/lib/utils";
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const {fetchData, loading, error,data} = useFetch<User[]>(`/user/view/all`);
+  const { fetchData, loading, error, data } =
+    useFetch<User[]>(`/user/view/all`);
 
   useEffect(() => {
     fetchData();
-  },[fetchData])
+  }, [fetchData]);
   useEffect(() => {
-    setUsers(data)
-  },[data])
-
-
+    setUsers(data);
+  }, [data]);
 
   const columns: ColumnDef<User>[] = [
     {
@@ -31,6 +30,10 @@ export default function Users() {
     {
       accessorKey: "createdTimestamp",
       header: "Created",
+      cell: ({ row }) => {
+        const user = row.original;
+        return formatDateTime(user.createdTimestamp);
+      },
     },
     {
       accessorKey: "isActive",
@@ -49,10 +52,7 @@ export default function Users() {
       header: "Action",
       cell: ({ row }) => {
         const user = row.original;
-        return (
-          <EditUserForm setUsers={setUsers} user={user} />
-          
-        );
+        return <EditUserForm setUsers={setUsers} user={user} />;
       },
     },
   ];
@@ -71,8 +71,8 @@ export default function Users() {
             </p>
           ) : error ? (
             <p>{`Error Fetching Resources: ${error.message}`}</p>
-          ) : !error && (
-            <DataTable dataValues={users} columns={columns} />
+          ) : (
+            !error && <DataTable dataValues={users} columns={columns} />
           )}
         </CardContent>
       </Card>

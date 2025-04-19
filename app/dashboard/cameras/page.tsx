@@ -9,16 +9,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { CameraForm } from "@/components/form/camera/form";
 import { DataTable } from "@/components/table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Loader2, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Camera, EditCameraProps } from "@/lib/types/camera";
+import { Camera, CameraConfigType, EditCameraProps } from "@/lib/types/camera";
 import { useFetch } from "@/lib/hooks";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { AddCameraConfigForm } from "@/components/form/camera/add-config";
 
 const EditCameraForm = ({
   camera,
@@ -108,13 +119,76 @@ const EditCameraForm = ({
   );
 };
 
+const CameraConfig = ({
+  cameraUID,
+  cameraConfig,
+  loading,
+  error,
+}: {
+  cameraUID: string;
+  cameraConfig: CameraConfigType;
+  loading: boolean;
+  error: Error | null;
+}) => {
+  useEffect(() => {
+    console.log("comp data", cameraConfig);
+  }, [cameraConfig]);
+  return (
+    <Dialog>
+      <DialogTrigger>Open</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Camera config {cameraUID}</DialogTitle>
+        </DialogHeader>
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <div className="p-4">
+            {cameraConfig ? (
+              <ScrollArea className=" max-h-[300px] h-full">
+                <div className="w-fit flex flex-col gap-4">
+                  {Object.keys(cameraConfig).map((key, value) => {
+                    return (
+                      <div className="flex gap-2">
+                        <p>
+                          {" "}
+                          <span className="font-bold">{key}</span>{" "}
+                          {/* @ts-expect-error ill fix this later */}
+                          {` : ${cameraConfig[key]}`}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            ) : (
+              <p>No config data</p>
+            )}
+          </div>
+        )}
+        {error && <div>{`Failed to fetch : ${error.message}`}</div>}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default function Cameras() {
   const { data, loading, error, fetchData } =
     useFetch<Camera[]>(`/camera/view/all`);
   const [cameras, setCameras] = useState<Camera[]>(data ?? []);
+  const cameraConfig = useFetch<CameraConfigType[]>(
+    "/camera/configuration/view/all"
+  );
+  const [configs, setConfigs] = useState<CameraConfigType[]>(
+    cameraConfig.data ?? []
+  );
+
   useEffect(() => {
-    console.log("cameras", cameras);
-  }, [cameras]);
+    cameraConfig.fetchData();
+  }, []);
+  useEffect(() => {
+    setConfigs(cameraConfig.data);
+  }, [cameraConfig.data]);
   const columns: ColumnDef<Camera>[] = [
     {
       accessorKey: "uid",
@@ -146,10 +220,29 @@ export default function Cameras() {
     },
     {
       accessorKey: "action",
-      header: "Action",
+      header: "Edit",
       cell: ({ row }) => {
         const camera = row.original;
-        return <EditCameraForm setCameras={setCameras} camera={camera} />;
+        return (
+          <div>
+            <EditCameraForm setCameras={setCameras} camera={camera} />
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "config",
+      header: "Config",
+      cell: ({ row }) => {
+        const camera = row.original;
+        return (
+          <CameraConfig
+            cameraConfig={configs.filter((e) => e.cameraUID == camera.uid)[0]}
+            loading={cameraConfig.loading}
+            error={cameraConfig.error}
+            cameraUID={camera.uid}
+          />
+        );
       },
     },
   ];
@@ -167,7 +260,10 @@ export default function Cameras() {
       <Card>
         <CardHeader className="flex flex-row justify-between gap-2">
           <p className="font-bold">All Cameras</p>
-          <CameraForm setData={setCameras} />
+          <div className="flex gap-2">
+            <AddCameraConfigForm cameras={cameras} setConfigs={setConfigs} />
+            <CameraForm setData={setCameras} />
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (

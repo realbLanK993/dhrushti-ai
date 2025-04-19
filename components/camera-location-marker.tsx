@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/select";
 import { Camera } from "@/lib/types/camera";
 
-type Point = { x: number; y: number };
+type Point = number[];
 type CameraDataType = {
   [key in string]: Point | null;
 };
-
-
 
 export default function CameraLocationMarker({
   background,
@@ -27,11 +25,11 @@ export default function CameraLocationMarker({
   selectedCamera,
   setSelectedCamera,
   handleSubmit,
-  allCameras
+  allCameras,
 }: {
   background?: string;
   imageD: { width: number; height: number } | null;
-  allCameras?:Camera[];
+  allCameras?: Camera[];
   cameraData: CameraDataType | null;
   setCameraData: React.Dispatch<React.SetStateAction<CameraDataType | null>>;
   selectedCamera: string | null;
@@ -57,7 +55,7 @@ export default function CameraLocationMarker({
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     const newPoint = { x, y };
 
-    setCameraData((prev) => ({ ...prev, [selectedCamera]: newPoint }));
+    setCameraData((prev) => ({ ...prev, [selectedCamera]: [x, y] }));
   };
 
   return (
@@ -112,7 +110,7 @@ export default function CameraLocationMarker({
                   <div
                     key={camera}
                     className="absolute w-4 h-4 bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2"
-                    style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                    style={{ left: `${point[0]}%`, top: `${point[1]}%` }}
                   >
                     <span className="absolute top-4 left-4 text-white bg-black px-1 rounded">
                       {index + 1}

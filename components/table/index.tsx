@@ -85,7 +85,7 @@ export function DataTable<TData, TValue>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 //@ts-expect-error This is an expected description that I'll have for every data that I provide I have anyways handled it even if there is no description
-                title={row.original.description ?? ""}
+                title={row.original.description ?? "No Description"}
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >

@@ -16,8 +16,9 @@ import CameraLocationMarker from "./camera-location-marker";
 import { useFetch } from "@/lib/hooks";
 import { Panel } from "@/lib/types/panel";
 import { Camera } from "@/lib/types/camera";
+import { PanelCalibrations } from "@/lib/types/calibration";
 
-type Point = { x: number; y: number };
+type Point = number[];
 type CalibrationData = {
   [key in string]: Point[];
 };
@@ -25,17 +26,24 @@ type CameraData = {
   [key in string]: Point | null;
 };
 
-export default function CalibrationModal() {
+export default function CalibrationModal({
+  panelCalibData,
+}: {
+  panelCalibData: PanelCalibrations[];
+}) {
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
   const [calibrationData, setCalibrationData] =
     useState<CalibrationData | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [cameraData, setCameraData] = useState<CameraData | null>(null);
+  const [selectedPanelCalibUID, setSelectedPanelCalibUID] =
+    useState<string>("");
   const [backgroundImage, setBackgroundImage] = useState<string | undefined>();
   const allPanels = useFetch<Panel[]>(`/panel/view/all`);
   const allCameras = useFetch<Camera[]>(`/camera/view/all`);
-  const uploadImage = useFetch(`/et/calib/system/upload`);
-  const submitData = useFetch(`/et/calib/system/metadata`);
+  const uploadImage = useFetch(`/panel/calibration/upload/`);
+  const submitCamera = useFetch("/panel/calibration/camera/add");
+  const submitPanel = useFetch("/panel/calibration/panel/add");
   const divRef = useRef<HTMLDivElement>(null);
   const [imageDimensions, setImageDimensions] = useState<{
     width: number;
@@ -117,7 +125,7 @@ export default function CalibrationModal() {
           const currentPoints = prev[selectedPanel];
           const updatedPoints =
             currentPoints.length < 4
-              ? [...currentPoints, newPoint]
+              ? [...currentPoints, [x, y]]
               : currentPoints;
 
           return {
@@ -150,67 +158,71 @@ export default function CalibrationModal() {
     //   return;
     // }
 
-    const returnCameraData = Object.entries(cameraData || {}).reduce(
-      (acc, [key, value]) => {
-        if (value) {
-          //@ts-expect-error I dont know why this is happening
-          acc[key] = [value.x, value.y];
-        }
-        return acc;
-      },
-      {} as CameraData
-    );
-    const returnCalibrationData = Object.entries(calibrationData || {}).reduce(
-      (acc, [key, value]) => {
-        if (value.length === 4) {
-          //@ts-expect-error I dont know why this is happening
-          acc[key] = value.map((point) => [point.x, point.y]);
-        }
-        return acc;
-      },
-      {} as CalibrationData
-    );
-
-    //remove all empty arrays from returnCalibrationData and returnCameraData
-    // returnCalibrationData.forEach((panel) => {
-    //   if (panel[Object.keys(panel)[0]]?.length === 0) {
-    //     delete panel[Object.keys(panel)[0]];
-    //   }
-    // });
-    // returnCameraData.forEach((camera) => {
-    //   if (camera[Object.keys(camera)[0]]?.length === 0) {
-    //     delete camera[Object.keys(camera)[0]];
-    //   }
-    // });
-    // const filteredReturnCalibrationData = returnCalibrationData.filter(
-    //   (obj) => Object.keys(obj).length > 0
+    // const returnCameraData = Object.entries(cameraData || {}).reduce(
+    //   (acc, [key, value]) => {
+    //     if (value) {
+    //       //@ts-expect-error I dont know why this is happening
+    //       acc[key] = [value.x, value.y];
+    //     }
+    //     return acc;
+    //   },
+    //   {} as CameraData
     // );
-    // const filteredReturnCameraData = returnCameraData.filter(
-    //   (obj) => Object.keys(obj).length > 0
+    // const returnCalibrationData = Object.entries(calibrationData || {}).reduce(
+    //   (acc, [key, value]) => {
+    //     if (value.length === 4) {
+    //       //@ts-expect-error I dont know why this is happening
+    //       acc[key] = value.map((point) => [point.x, point.y]);
+    //     }
+    //     return acc;
+    //   },
+    //   {} as CalibrationData
     // );
 
-    // if (filteredReturnCalibrationData.length == 0) {
-    //   alert("Please ensure all panels have exactly 4 points selected.");
-    //   return;
-    // }
-    // if (filteredReturnCameraData.length == 0) {
-    //   alert("Please mark the location for all cameras.");
-    //   return;
-    // }
     const formData = new FormData();
-    if(backgroundImage) formData.append("file", backgroundImage);
-    submitData.fetchData({
+    if (backgroundImage) formData.append("file", backgroundImage);
+
+    const panelData =
+      calibrationData && selectedPanel ? calibrationData[selectedPanel] : [];
+
+    if (panelData && panelData.length < 1) {
+      alert("Panels points not selected");
+      return;
+    }
+    if (!selectedPanelCalibUID) {
+      alert("Select panel calibration UID");
+      return;
+    }
+    if (!selectedCamera) {
+      alert("Select Camera");
+      return;
+    }
+    if (!cameraData) {
+      alert("Select camera data points");
+      return;
+    }
+    submitCamera.fetchData({
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        uid: "2024-11-24-07-42-19-685560",
-        panels: returnCalibrationData,
-        cameras: returnCameraData,
+        panelCalibUID: selectedPanelCalibUID,
+        cameraUID: selectedCamera,
+        point: cameraData[selectedCamera],
       }),
     });
-
+    submitPanel.fetchData({
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        panelUID: selectedPanel,
+        panelCalibUID: selectedPanelCalibUID,
+        points: panelData,
+      }),
+    });
     const initialCalibrationData: CalibrationData = allPanels.data.reduce(
       (acc, panel) => ({
         ...acc,
@@ -229,11 +241,7 @@ export default function CalibrationModal() {
 
     setCameraData(initialCameraData);
     setSelectedCamera(null);
-    console.log(
-      "Submitting:",
-      returnCalibrationData,
-      returnCameraData
-    );
+    // console.log("Submitting:", returnCalibrationData, returnCameraData);
     setCalibrationData(initialCalibrationData);
     setSelectedPanel(null);
   };
@@ -250,11 +258,26 @@ export default function CalibrationModal() {
               onValueChange={(value: string) => setSelectedPanel(value)}
               value={selectedPanel || undefined}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="max-w-[180px]">
                 <SelectValue placeholder="Select Panel" />
               </SelectTrigger>
               <SelectContent>
                 {allPanels.data?.map((panel) => (
+                  <SelectItem key={panel.uid} value={panel.uid}>
+                    {panel.uid}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              onValueChange={(value: string) => setSelectedPanelCalibUID(value)}
+              value={selectedPanelCalibUID}
+            >
+              <SelectTrigger className="max-w-[300px]">
+                <SelectValue placeholder="Select Panel Calibrations" />
+              </SelectTrigger>
+              <SelectContent>
+                {panelCalibData.map((panel) => (
                   <SelectItem key={panel.uid} value={panel.uid}>
                     {panel.uid}
                   </SelectItem>
@@ -288,11 +311,11 @@ export default function CalibrationModal() {
                 <div
                   key={`${panel}-${index}`}
                   className="absolute w-4 h-4 bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                  style={{ left: `${point[0]}%`, top: `${point[1]}%` }}
                 >
-                  <span className="absolute w-[4.6rem] top-4 left-4 text-white bg-black px-1 rounded">{`(${point.x.toFixed(
+                  <span className="absolute w-[4.6rem] top-4 left-4 text-white bg-black px-1 rounded">{`(${point[0].toFixed(
                     0
-                  )}, ${point.y.toFixed(0)})`}</span>
+                  )}, ${point[1].toFixed(0)})`}</span>
                 </div>
               ))
             )}

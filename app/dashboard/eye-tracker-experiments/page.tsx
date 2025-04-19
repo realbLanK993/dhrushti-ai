@@ -2,7 +2,12 @@
 
 import CalibrationModal from "@/components/calibration-modal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { useFetch } from "@/lib/hooks";
 import { useEffect, useState } from "react";
 
@@ -11,7 +16,7 @@ export default function EyeTrackerExperiments() {
   const eyeTrackerStatus = useFetch<boolean>("/et/run/status");
   const eyeTrackerStart = useFetch<string>("/et/run/start");
   const eyeTrackerStop = useFetch<string>("/et/run/stop");
-  useEffect(() => {
+  const eyeTrackerData = useEffect(() => {
     setStatus(eyeTrackerStatus.data);
   }, [eyeTrackerStatus.data]);
   useEffect(() => {
@@ -53,9 +58,7 @@ export default function EyeTrackerExperiments() {
             </Button>
           )}
         </CardHeader>
-        <CardContent>
-          <CalibrationModal />
-        </CardContent>
+        <CardFooter></CardFooter>
       </Card>
     </div>
   );
