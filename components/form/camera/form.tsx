@@ -29,11 +29,23 @@ export const CameraForm = ({
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
   const { data, loading, error, fetchData } = useFetch<Camera>("/camera/add");
+  const connectedCameras = useFetch<{ uid: string }[]>(
+    "/camera/view/connected"
+  );
+  const [connectedCameraData, setConnectedCameraData] = useState<
+    { uid: string }[] | null
+  >(connectedCameras.data);
   useEffect(() => {
     if (data) {
       setData((prev) => [data, ...prev]);
     }
   }, [data, setData]);
+  useEffect(() => {
+    connectedCameras.fetchData();
+  }, []);
+  useEffect(() => {
+    setConnectedCameraData(connectedCameras.data);
+  }, [connectedCameras.data]);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -56,9 +68,13 @@ export const CameraForm = ({
                   <SelectValue placeholder="Serial Number" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem disabled value="SN09876542">
-                    SN09876542
-                  </SelectItem>
+                  {connectedCameraData?.map((cam) => {
+                    return (
+                      <SelectItem key={cam.uid} value="SN09876542">
+                        {cam.uid}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

@@ -16,18 +16,55 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DataTable } from "@/components/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { formatDateTime } from "@/lib/utils";
+
+type CameraCalibrationType = {
+  uid: number;
+  createdTimestamp: string;
+  refCamUID: number;
+  isActive: boolean;
+  description?: string;
+};
 
 export default function Calibrations() {
-  const cameraCalibrations = useFetch<CameraCalibrations[]>(
+  const allCameraCalibration = useFetch<CameraCalibrationType[]>(
     "/camera/calibration/view/all"
   );
   const panelCalibrations = useFetch<PanelCalibrations[]>(
     "/panel/calibration/view/all"
   );
   useEffect(() => {
-    cameraCalibrations.fetchData();
+    allCameraCalibration.fetchData();
     panelCalibrations.fetchData();
   }, []);
+
+  const columns: ColumnDef<CameraCalibrationType>[] = [
+    {
+      accessorKey: "uid",
+      header: "UID",
+    },
+    {
+      accessorKey: "createdTimestamp",
+      header: "Created",
+      cell: ({ row }) => {
+        return formatDateTime(row.original.createdTimestamp);
+      },
+    },
+    {
+      accessorKey: "refCamUID",
+      header: "Reference Cam ID",
+    },
+    {
+      accessorKey: "isActive",
+      header: "Active",
+      cell: ({ row }) => {
+        return row.original.isActive ? "Yes" : "No";
+      },
+    },
+  ];
+
   return (
     <div className="pt-20 p-4 flex flex-col gap-32">
       <Tabs defaultValue="panel">
@@ -67,6 +104,12 @@ export default function Calibrations() {
               <span className="font-bold">Camera Calibration</span>
               <CameraCalibration />
             </CardHeader>
+            <CardContent>
+              <DataTable
+                columns={columns}
+                dataValues={allCameraCalibration.data}
+              />
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
